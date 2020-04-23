@@ -24,26 +24,37 @@ module Atomic
     private
 
     def render(partial_name, *arguments, **options, &block)
+      original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
+
       if block.present?
-        contents =  @view_context.capture(@view_context, &block)
-        wrapped_block = Proc.new { contents }
+        wrapped_block = Proc.new do
+          begin
+            @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
+            yield
+          ensure
+            @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
+          end
+        end
 
-        lookup_key = :layout
+        @view_context.render(
+          layout: partial_name,
+          locals: {
+            arguments: arguments,
+            options: options,
+            block: wrapped_block,
+          },
+          &wrapped_block
+        )
       else
-        wrapped_block = nil
-
-        lookup_key = :partial
+        @view_context.render(
+          partial: partial_name,
+          locals: {
+            arguments: arguments,
+            options: options,
+            block: nil,
+          },
+        )
       end
-
-      @view_context.render(
-        lookup_key => partial_name,
-        locals: {
-          arguments: arguments,
-          options: options,
-          block: wrapped_block,
-        },
-        &wrapped_block
-      )
     end
   end
 end

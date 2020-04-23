@@ -18,7 +18,7 @@ class AtomicComponentTest < AtomicTestCase
       </div>
     ERB
     declare_template "comments/show", <<~ERB
-      <%= render layout: "atomic/components/card" do |_, section| %>
+      <%= atomic.component.card do |_, section| %>
         <%- case section when :body -%>
           Comment Body
         <%- when :author -%>
