@@ -25,15 +25,15 @@ module Atomic
 
     def render(partial_name, *arguments, **options, &block)
       original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
+      @virtual_path = original_virtual_path
 
       if block.present?
-        wrapped_block = Proc.new do
-          begin
-            @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
-            yield
-          ensure
-            @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
-          end
+        if block.arity > 0
+          wrapped_block = block
+        else
+          content = @view_context.capture(self, &block)
+
+          wrapped_block = Proc.new { content }
         end
 
         @view_context.render(
@@ -55,6 +55,8 @@ module Atomic
           },
         )
       end
+    ensure
+      @virtual_path = nil
     end
   end
 end
