@@ -67,5 +67,41 @@ module Atomic
 
       assert_select %(img[src*="image.jpg"][class="image"])
     end
+
+    test "translates text with the calling template's scope" do
+      with_translations posts: { show: { title: "Title From Atomic" } } do
+        declare_template "posts/show", <<~ERB
+          <%= atomic.link_to "#" do %>
+            <%= translate(".title") %>
+          <% end %>
+        ERB
+        declare_template "atomic/_link_to", <<~'ERB'
+          <%= link_to(*arguments, class: "link", **options, &block) %>
+        ERB
+
+        render "posts/show"
+
+        assert_select %(a[href="#"][class="link"]), text: translate("posts.show.title")
+      end
+    end
+
+    test "translates text when the partial uses the `yield` keyword" do
+      with_translations posts: { show: { link: "Translated" } } do
+        declare_template "posts/show", <<~ERB
+          <%= atomic.link_to "#" do %>
+            <%= translate(".link") %>
+          <% end %>
+        ERB
+        declare_template "atomic/_link_to", <<~ERB
+          <%= link_to(*arguments, class: "atomic-link", **options) do %>
+            <%= yield %>
+          <% end %>
+        ERB
+
+        render "posts/show"
+
+        assert_select %(a[href="#"][class="atomic-link"]), text: "Translated"
+      end
+    end
   end
 end

@@ -78,5 +78,22 @@ module Atomic
       assert_select %(h1[class="typography typography--h1"]), text: "Title"
       assert_select %(h2[class="typography typography--h2"]), text: "Subtitle"
     end
+
+    test "translates text with the calling template's scope" do
+      with_translations posts: { show: { title: "Title From Atomic" } } do
+        declare_template "posts/show", <<~ERB
+          <%= atomic_tag.h1 do %>
+            <%= translate(".title") %>
+          <% end %>
+        ERB
+        declare_template "atomic/_h1", <<~'ERB'
+          <%= tag.h1(*arguments, class: "atomic-h1", **options, &block) %>
+        ERB
+
+        render "posts/show"
+
+        assert_select %(h1[class="atomic-h1"]), text: "Title From Atomic"
+      end
+    end
   end
 end
