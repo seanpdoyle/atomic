@@ -34,5 +34,20 @@ module Atomic
       assert_select %(a[href="#"][class="atomic-link"]), text: "Link From Atomic", count: 1
       assert_select %(img[src*="image.jpg"][class="atomic-img"]), count: 1
     end
+
+    test "makes options available to the template" do
+      declare_template "comments/show", <<~ERB
+        <%= atomic.link_to "#", class: "from-template" do %>
+          Link From Atomic
+        <% end %>
+      ERB
+      declare_template "atomic/_link_to", <<~'ERB'
+        <%= link_to(*arguments, class: "from-partial #{options.delete(:class)}", **options, &block) %>
+      ERB
+
+      render "comments/show"
+
+      assert_select %(a[class="from-partial from-template"]), text: "Link From Atomic", count: 1
+    end
   end
 end
