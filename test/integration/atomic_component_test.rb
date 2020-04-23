@@ -6,19 +6,19 @@ class AtomicComponentTest < AtomicTestCase
   end
 
   test "accepts block with named yields" do
-    declare_template "atomic_component_test/comments/_comment", <<~ERB
+    declare_template "atomic/components/_card", <<~ERB
       <div class="card">
         <header class="card__author">
-          <%= yield comment, :author %>
+          <%= yield nil, :author %>
         </header>
 
         <p class="card__body">
-          <%= yield comment, :body %>
+          <%= yield nil, :body %>
         </p>
       </div>
     ERB
     declare_template "comments/show", <<~ERB
-      <%= render layout: comment do |comment, section| %>
+      <%= render layout: "atomic/components/card" do |_, section| %>
         <%- case section when :body -%>
           Comment Body
         <%- when :author -%>
