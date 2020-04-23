@@ -28,18 +28,26 @@ module Atomic
 
     def render(partial_name, *arguments, &block)
       options = arguments.extract_options!
-      wrapped_block = nil
 
       if block.present?
         contents =  @view_context.capture(@view_context, &block)
         wrapped_block = Proc.new { contents }
+
+        template_key = :layout
+      else
+        wrapped_block = nil
+
+        template_key = :partial
       end
 
       @view_context.render(
-        partial_name,
-        arguments: arguments,
-        options: options,
-        block: wrapped_block,
+        template_key => partial_name,
+        locals: {
+          arguments: arguments,
+          options: options,
+          block: wrapped_block,
+        },
+        &wrapped_block
       )
     end
   end
