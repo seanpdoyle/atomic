@@ -1,7 +1,7 @@
 module Atomic
   module ApplicationHelper
     def atomic_tag
-      tag
+      Atomic::Helper.new(view_context: self, target: tag)
     end
   end
 end
