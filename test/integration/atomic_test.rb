@@ -23,10 +23,10 @@ class AtomicTest < AtomicTestCase
         Body From Atomic
       <% end %>
     ERB
-    declare_template "atomic/_h1", <<~ERB
+    declare_template "atomic/tags/_h1", <<~ERB
       <%= tag.h1(*arguments, class: "atomic-h1", **options, &block) %>
     ERB
-    declare_template "atomic/_p", <<~ERB
+    declare_template "atomic/tags/_p", <<~ERB
       <%= tag.p(*arguments, class: "atomic-p", **options, &block) %>
     ERB
 

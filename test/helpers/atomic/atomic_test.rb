@@ -59,7 +59,7 @@ module Atomic
 
         <%= atomic_tag.img(src: image_path(src), **options, &block) %>
       ERB
-      declare_template "atomic/_img", <<~'ERB'
+      declare_template "atomic/tags/_img", <<~'ERB'
         <%= tag.img(*arguments, class: "image", **options, &block) %>
       ERB
 

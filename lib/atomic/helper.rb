@@ -15,6 +15,15 @@ module Atomic
       )
     end
 
+    def tag
+      Atomic::Helper.new(
+        view_context: @view_context,
+        virtual_path: @virtual_path,
+        path: File.join(@path, "tags"),
+        target: @view_context.tag,
+      )
+    end
+
     def method_missing(method_name, *arguments, **options, &block)
       if @view_context.lookup_context.template_exists?("#{@path}/_#{method_name}")
         render("#{@path}/#{method_name}", *arguments, **options, &block)

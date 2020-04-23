@@ -24,10 +24,10 @@ module Atomic
           Body From Atomic
         <% end %>
       ERB
-      declare_template "atomic/_h1", <<~ERB
+      declare_template "atomic/tags/_h1", <<~ERB
         <%= tag.h1(*arguments, class: "atomic-h1", **options, &block) %>
       ERB
-      declare_template "atomic/_p", <<~ERB
+      declare_template "atomic/tags/_p", <<~ERB
         <%= tag.p(*arguments, class: "atomic-p", **options, &block) %>
       ERB
 
@@ -43,7 +43,7 @@ module Atomic
           Title From Atomic
         <% end %>
       ERB
-      declare_template "atomic/_h1", <<~'ERB'
+      declare_template "atomic/tags/_h1", <<~'ERB'
         <%= tag.h1(*arguments, class: "from-partial #{options.delete(:class)}", **options, &block) %>
       ERB
 
@@ -57,10 +57,10 @@ module Atomic
         <%= atomic_tag.h1 "Title" %>
         <%= atomic_tag.h2 "Subtitle" %>
       ERB
-      declare_template "atomic/_h1", <<~'ERB'
+      declare_template "atomic/tags/_h1", <<~'ERB'
         <%= render("typography", local_assigns.merge(tag_name: :h1)) %>
       ERB
-      declare_template "atomic/_h2", <<~'ERB'
+      declare_template "atomic/tags/_h2", <<~'ERB'
         <%= render("typography", local_assigns.merge(tag_name: :h2)) %>
       ERB
       declare_template "application/_typography", <<~'ERB'
@@ -86,7 +86,7 @@ module Atomic
             <%= translate(".title") %>
           <% end %>
         ERB
-        declare_template "atomic/_h1", <<~'ERB'
+        declare_template "atomic/tags/_h1", <<~'ERB'
           <%= tag.h1(*arguments, class: "atomic-h1", **options, &block) %>
         ERB
 
@@ -103,7 +103,7 @@ module Atomic
             <%= translate(".title") %>
           <% end %>
         ERB
-        declare_template "atomic/_h1", <<~'ERB'
+        declare_template "atomic/tags/_h1", <<~'ERB'
           <h1 class="atomic-h1">
             <%= yield %>
           </h1>
