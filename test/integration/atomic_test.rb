@@ -35,4 +35,19 @@ class AtomicTest < AtomicTestCase
     assert_select %(h1[class="atomic-h1"]), text: "Title From Atomic", count: 1
     assert_select %(p[class="atomic-p"]), text: "Body From Atomic", count: 1
   end
+
+  test "atomic overrides Rails view helpers" do
+    declare_template "comments/show", <<~ERB
+      <%= atomic.link_to "#" do %>
+        Link
+      <% end %>
+    ERB
+    declare_template "atomic/_link_to", <<~ERB
+      <%= link_to(*arguments, class: "atomic-link", **options, &block) %>
+    ERB
+
+    render "comments/show"
+
+    assert_select %(a[href="#"][class="atomic-link"]), text: "Link", count: 1
+  end
 end
