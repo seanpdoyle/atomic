@@ -6,6 +6,13 @@ module Atomic
       @target = target
     end
 
+    def component
+      Atomic::Helper.new(
+        view_context: @view_context,
+        partial_path: File.join(@partial_path, "components"),
+      )
+    end
+
     def tag
       Atomic::Helper.new(
         view_context: @view_context,
