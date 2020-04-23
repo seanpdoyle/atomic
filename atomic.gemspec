@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version     = Atomic::VERSION
   spec.authors     = ["Sean Doyle"]
   spec.email       = ["sean.p.doyle24@gmail.com"]
-  spec.homepage    = "TODO"
-  spec.summary     = "TODO: Summary of Atomic."
-  spec.description = "TODO: Description of Atomic."
+  spec.homepage    = "https://github.com/seanpdoyle/atomic"
+  spec.summary     = "Use `ActionView` partials for your application's components"
+  spec.description = "Use the `atomic_tag` and `atomic` helper methods to access your design system."
   spec.license     = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
