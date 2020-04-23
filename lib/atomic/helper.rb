@@ -27,39 +27,41 @@ module Atomic
 
     def render(partial_name, *arguments, **options, &block)
       if block.present?
-        if block.arity > 0
-          wrapped_block = Proc.new do |*a|
-            original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
-            @view_context.instance_variable_set(:@virtual_path, @virtual_path)
-            block.call(*a)
-          ensure
-            @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
-          end
-        else
+        if block.arity.zero?
           content = @view_context.capture(self, &block)
 
-          wrapped_block = Proc.new { content }
+          wrapped_block = proc { content }
+        else
+          wrapped_block = proc do |*block_arguments|
+            with_overridden_virtual_path { block.call(*block_arguments) }
+          end
         end
 
-        @view_context.render(
-          layout: partial_name,
-          locals: {
-            arguments: arguments,
-            options: options,
-            block: wrapped_block,
-          },
-          &wrapped_block
-        )
+        template_key = :layout
       else
-        @view_context.render(
-          partial: partial_name,
-          locals: {
-            arguments: arguments,
-            options: options,
-            block: nil,
-          },
-        )
+        wrapped_block = nil
+
+        template_key = :partial
       end
+
+      @view_context.render(
+        template_key => partial_name,
+        locals: {
+          arguments: arguments,
+          options: options,
+          block: wrapped_block,
+        },
+        &wrapped_block
+      )
+    end
+
+    def with_overridden_virtual_path
+      original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
+      @view_context.instance_variable_set(:@virtual_path, @virtual_path)
+
+      yield
+    ensure
+      @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
     end
   end
 end
