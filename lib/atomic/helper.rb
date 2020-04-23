@@ -1,7 +1,8 @@
 module Atomic
   class Helper
-    def initialize(view_context:, partial_path:, target: view_context)
+    def initialize(view_context:, virtual_path:, partial_path:, target: view_context)
       @view_context = view_context
+      @virtual_path = virtual_path
       @partial_path = partial_path
       @target = target
     end
@@ -10,12 +11,14 @@ module Atomic
       Atomic::Helper.new(
         view_context: @view_context,
         partial_path: File.join(@partial_path, "components"),
+        virtual_path: @virtual_path,
       )
     end
 
     def tag
       Atomic::Helper.new(
         view_context: @view_context,
+        virtual_path: @virtual_path,
         partial_path: File.join(@partial_path, "tags"),
         target: @view_context.tag,
       )
@@ -37,8 +40,15 @@ module Atomic
       options = arguments.extract_options!
 
       if block.present?
-        contents =  @view_context.capture(@view_context, &block)
-        wrapped_block = Proc.new { contents }
+        if block.arity.zero?
+          contents = @view_context.capture(@view_context, &block)
+
+          wrapped_block = proc { contents }
+        else
+          wrapped_block = proc do |*block_arguments|
+            with_overridden_virtual_path { block.call(*block_arguments) }
+          end
+        end
 
         template_key = :layout
       else
@@ -53,9 +63,19 @@ module Atomic
           arguments: arguments,
           options: options,
           block: wrapped_block,
+          **options,
         },
         &wrapped_block
       )
+    end
+
+    def with_overridden_virtual_path
+      original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
+      @view_context.instance_variable_set(:@virtual_path, @virtual_path)
+
+      yield
+    ensure
+      @view_context.instance_variable_set(:@virtual_path, original_virtual_path)
     end
   end
 end
