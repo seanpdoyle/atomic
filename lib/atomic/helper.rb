@@ -15,22 +15,28 @@ module Atomic
 
     def method_missing(method_name, *arguments, **options, &block)
       if @view_context.lookup_context.template_exists?("#{@path}/_#{method_name}")
-        wrapped_block = nil
-
-        if block.present?
-          contents =  @view_context.capture(@view_context, &block)
-          wrapped_block = Proc.new { contents }
-        end
-
-        @view_context.render(
-          "#{@path}/#{method_name}",
-          arguments: arguments,
-          options: options,
-          block: wrapped_block,
-        )
+        render("#{@path}/#{method_name}", *arguments, **options, &block)
       else
         @target.public_send(method_name, *arguments, **options, &block)
       end
+    end
+
+    private
+
+    def render(partial_name, *arguments, **options, &block)
+      wrapped_block = nil
+
+      if block.present?
+        contents =  @view_context.capture(@view_context, &block)
+        wrapped_block = Proc.new { contents }
+      end
+
+      @view_context.render(
+        partial_name,
+        arguments: arguments,
+        options: options,
+        block: wrapped_block,
+      )
     end
   end
 end
