@@ -1,12 +1,20 @@
 module Atomic
   class Helper
-    def initialize(view_context:, target: view_context)
+    def initialize(view_context:, target: view_context, path: "atomic")
       @view_context = view_context
       @target = target
+      @path = path
+    end
+
+    def component
+      Atomic::Helper.new(
+        view_context: @view_context,
+        path: File.join(@path, "components"),
+      )
     end
 
     def method_missing(method_name, *arguments, **options, &block)
-      if @view_context.lookup_context.template_exists?("atomic/_#{method_name}")
+      if @view_context.lookup_context.template_exists?("#{@path}/_#{method_name}")
         wrapped_block = nil
 
         if block.present?
@@ -15,7 +23,7 @@ module Atomic
         end
 
         @view_context.render(
-          "atomic/#{method_name}",
+          "#{@path}/#{method_name}",
           arguments: arguments,
           options: options,
           block: wrapped_block,

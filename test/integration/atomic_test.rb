@@ -35,4 +35,21 @@ class AtomicTest < AtomicTestCase
     assert_select %(h1[class="atomic-h1"]), text: "Title From Atomic"
     assert_select %(p[class="atomic-p"]), text: "Body From Atomic"
   end
+
+  test "atomic.component renders partials within atomic/components" do
+    declare_template "users/show", <<~ERB
+      <%= atomic.component.wrapper do %>
+        Wrapped Text
+      <% end %>
+    ERB
+    declare_template "atomic/components/_wrapper", <<~ERB
+      <div class="wrapper">
+        <%= block.call %>
+      </div>
+    ERB
+
+    render "users/show"
+
+    assert_select %(div[class="wrapper"]), text: "Wrapped Text"
+  end
 end
