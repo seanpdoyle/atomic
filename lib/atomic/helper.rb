@@ -24,18 +24,25 @@ module Atomic
     private
 
     def render(partial_name, *arguments, **options, &block)
-      wrapped_block = nil
-
       if block.present?
         contents =  @view_context.capture(@view_context, &block)
         wrapped_block = Proc.new { contents }
+
+        lookup_key = :layout
+      else
+        wrapped_block = nil
+
+        lookup_key = :partial
       end
 
       @view_context.render(
-        partial_name,
-        arguments: arguments,
-        options: options,
-        block: wrapped_block,
+        lookup_key => partial_name,
+        locals: {
+          arguments: arguments,
+          options: options,
+          block: wrapped_block,
+        },
+        &wrapped_block
       )
     end
   end

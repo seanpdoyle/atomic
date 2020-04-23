@@ -75,7 +75,7 @@ module Atomic
             <%= translate(".title") %>
           <% end %>
         ERB
-        declare_template "atomic/_link_to", <<~'ERB'
+        declare_template "atomic/_link_to", <<~ERB
           <%= link_to(*arguments, class: "link", **options, &block) %>
         ERB
 

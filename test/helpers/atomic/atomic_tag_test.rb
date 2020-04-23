@@ -95,5 +95,24 @@ module Atomic
         assert_select %(h1[class="atomic-h1"]), text: "Title From Atomic"
       end
     end
+
+    test "translates text when the partial uses the `yield` keyword" do
+      with_translations posts: { show: { title: "Translated" } } do
+        declare_template "posts/show", <<~ERB
+          <%= atomic_tag.h1 do %>
+            <%= translate(".title") %>
+          <% end %>
+        ERB
+        declare_template "atomic/_h1", <<~'ERB'
+          <h1 class="atomic-h1">
+            <%= yield %>
+          </h1>
+        ERB
+
+        render "posts/show"
+
+        assert_select %(h1[class="atomic-h1"]), text: "Translated"
+      end
+    end
   end
 end
