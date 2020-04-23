@@ -1,6 +1,7 @@
 require "test_helper"
 
 class AtomicTestCase < ActiveSupport::TestCase
+  include ActionView::Helpers::TranslationHelper
   include Rails::Dom::Testing::Assertions
 
   def around(&block)
@@ -43,5 +44,13 @@ class AtomicTestCase < ActiveSupport::TestCase
     block.call
   ensure
     ActionController::Base.view_paths = view_paths
+  end
+
+  def with_translations(translations, &block)
+    I18n.backend.store_translations(I18n.locale, translations)
+
+    block.call
+  ensure
+    I18n.backend.reload!
   end
 end

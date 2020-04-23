@@ -67,5 +67,22 @@ module Atomic
 
       assert_select %(img[src*="image.jpg"][class="image"]), count: 1
     end
+
+    test "translates text with the calling template's scope" do
+      with_translations comments: { show: { title: "Translated" } } do
+        declare_template "comments/show", <<~ERB
+          <%= atomic.link_to "#" do %>
+            <%= translate(".title") %>
+          <% end %>
+        ERB
+        declare_template "atomic/_link_to", <<~ERB
+          <%= link_to(*arguments, class: "link", **options, &block) %>
+        ERB
+
+        render "comments/show"
+
+        assert_select %(a[href="#"][class="link"]), text: "Translated", count: 1
+      end
+    end
   end
 end

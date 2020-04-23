@@ -28,12 +28,18 @@ module Atomic
 
     def render(partial_name, *arguments, &block)
       options = arguments.extract_options!
+      wrapped_block = nil
+
+      if block.present?
+        contents =  @view_context.capture(@view_context, &block)
+        wrapped_block = Proc.new { contents }
+      end
 
       @view_context.render(
         partial_name,
         arguments: arguments,
         options: options,
-        block: block,
+        block: wrapped_block,
       )
     end
   end
