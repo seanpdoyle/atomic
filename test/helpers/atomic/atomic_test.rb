@@ -49,5 +49,23 @@ module Atomic
 
       assert_select %(a[class="from-partial from-template"]), text: "Link From Atomic", count: 1
     end
+
+    test "has existing partials available for use" do
+      declare_template "comments/show", <<~ERB
+      <%= atomic.image_tag "image.jpg" %>
+      ERB
+      declare_template "atomic/_image_tag", <<~ERB
+        <% src, * = *arguments %>
+
+        <%= atomic_tag.img(src: image_path(src), **options, &block) %>
+      ERB
+      declare_template "atomic/tags/_img", <<~ERB
+        <%= tag.img(*arguments, class: "image", **options, &block) %>
+      ERB
+
+      render "comments/show"
+
+      assert_select %(img[src*="image.jpg"][class="image"]), count: 1
+    end
   end
 end
