@@ -51,5 +51,32 @@ module Atomic
 
       assert_select %(h1[class="from-partial from-template"]), text: "Title From Atomic"
     end
+
+    test "has existing partials available for use" do
+      declare_template "users/show", <<~ERB
+        <%= atomic_tag.h1 "Title" %>
+        <%= atomic_tag.h2 "Subtitle" %>
+      ERB
+      declare_template "atomic/_h1", <<~'ERB'
+        <%= render("typography", local_assigns.merge(tag_name: :h1)) %>
+      ERB
+      declare_template "atomic/_h2", <<~'ERB'
+        <%= render("typography", local_assigns.merge(tag_name: :h2)) %>
+      ERB
+      declare_template "application/_typography", <<~'ERB'
+        <%= content_tag(
+          tag_name,
+          *arguments,
+          class: "typography typography--#{tag_name}",
+          **options,
+          &block
+        ) %>
+      ERB
+
+      render "users/show"
+
+      assert_select %(h1[class="typography typography--h1"]), text: "Title"
+      assert_select %(h2[class="typography typography--h2"]), text: "Subtitle"
+    end
   end
 end
