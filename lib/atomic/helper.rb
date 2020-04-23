@@ -24,14 +24,11 @@ module Atomic
     private
 
     def render(partial_name, *arguments, **options, &block)
-      original_virtual_path = @view_context.instance_variable_get(:@virtual_path)
-      @virtual_path = original_virtual_path
-
       if block.present?
         if block.arity > 0
           wrapped_block = block
         else
-          content = @view_context.capture(self, &block)
+          content = @view_context.capture(@view_context, &block)
 
           wrapped_block = Proc.new { content }
         end
@@ -55,8 +52,6 @@ module Atomic
           },
         )
       end
-    ensure
-      @virtual_path = nil
     end
   end
 end
