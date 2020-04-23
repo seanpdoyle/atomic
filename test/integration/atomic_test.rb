@@ -20,14 +20,22 @@ class AtomicTest < ActiveSupport::TestCase
       <%= atomic_tag.h1 do %>
         Title From Atomic
       <% end %>
+
+      <%= atomic_tag.p do %>
+        Body From Atomic
+      <% end %>
     ERB
     declare_template "atomic/_h1", <<~ERB
       <%= tag.h1(*arguments, class: "atomic-h1", **options, &block) %>
+    ERB
+    declare_template "atomic/_p", <<~ERB
+      <%= tag.p(*arguments, class: "atomic-p", **options, &block) %>
     ERB
 
     render "users/show"
 
     assert_select %(h1[class="atomic-h1"]), text: "Title From Atomic"
+    assert_select %(p[class="atomic-p"]), text: "Body From Atomic"
   end
 
   def around(&block)

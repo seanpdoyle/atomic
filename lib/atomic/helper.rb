@@ -5,16 +5,16 @@ module Atomic
       @target = target
     end
 
-    def h1(*arguments, **options, &block)
-      if @view_context.lookup_context.template_exists?("atomic/_h1")
+    def method_missing(method_name, *arguments, **options, &block)
+      if @view_context.lookup_context.template_exists?("atomic/_#{method_name}")
         @view_context.render(
-          "atomic/h1",
+          "atomic/#{method_name}",
           arguments: arguments,
           options: options,
           block: block,
         )
       else
-        @target.h1(*arguments, **options, &block)
+        @target.public_send(method_name, *arguments, **options, &block)
       end
     end
   end
