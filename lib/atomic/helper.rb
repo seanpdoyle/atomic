@@ -1,4 +1,5 @@
 require_dependency "atomic/html_attributes"
+require_dependency "atomic/fallback"
 
 module Atomic
   class Helper
@@ -27,10 +28,12 @@ module Atomic
     end
 
     def method_missing(method_name, *arguments, &block)
+      fallback = Fallback.new(@target, method_name, *arguments, &block)
+
       if @view_context.lookup_context.template_exists?("#{@partial_path}/_#{method_name}")
-        render("#{@partial_path}/#{method_name}", *arguments, &block)
+        render("#{@partial_path}/#{method_name}", fallback, *arguments, &block)
       elsif @target.respond_to?(method_name)
-        @target.public_send(method_name, *arguments, &block)
+        fallback.call
       else
         super
       end
@@ -38,7 +41,7 @@ module Atomic
 
     private
 
-    def render(partial_name, *arguments, &block)
+    def render(partial_name, fallback, *arguments, &block)
       options = HtmlAttributes.new(arguments.extract_options!)
 
       if block.present?
@@ -62,6 +65,7 @@ module Atomic
       @view_context.render(
         template_key => partial_name,
         locals: {
+          fallback: fallback,
           arguments: arguments,
           options: options,
           block: wrapped_block,

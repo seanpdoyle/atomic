@@ -146,6 +146,30 @@ For instance, you could chain `with_defaults` off the value returned by
 [hash-extensions]: https://guides.rubyonrails.org/active_support_core_extensions.html#extensions-to-hash
 [with_defaults]: https://api.rubyonrails.org/classes/Hash.html#method-i-with_defaults
 
+#### Falling back to the Rails-provided helper
+
+In some cases, the changes in the Atomic view partial don't amount to much more
+than default `class` declarations.
+
+There are two ways to leverage the overridden, Rails-provided helper:
+
+1. invoke the helper directly, by name, and splat out the view partial-local
+   `arguments`, `options`, and `&block` variables:
+
+   ```html+erb
+   <%# app/views/atomic/tags/_h1.html.erb %>
+   <%= tag.h1(*arguments, **options.with_token_list_defaults(class: "heading"), &block) %>
+   ```
+
+2. chain your calls to declare default token lists (via
+   `with_token_list_defaults`) or other default attributes (via `with_defaults`)
+   off a reference to the partial-local `fallback` variable:
+
+   ```html+erb
+   <%# app/views/atomic/tags/_h1.html.erb %>
+   <%= fallback.with_token_list_defaults(class: "heading") %>
+   ```
+
 ### View Partials for your application's components
 
 The `atomic.component` view helper provides a means of rendering view partials
