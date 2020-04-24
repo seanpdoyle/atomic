@@ -1,3 +1,5 @@
+require_dependency "atomic/html_attributes"
+
 module Atomic
   class Helper
     def initialize(view_context:, virtual_path:, partial_path:, target: view_context)
@@ -37,7 +39,7 @@ module Atomic
     private
 
     def render(partial_name, *arguments, &block)
-      options = arguments.extract_options!
+      options = HtmlAttributes.new(arguments.extract_options!)
 
       if block.present?
         if block.arity.zero?

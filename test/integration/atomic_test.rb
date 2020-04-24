@@ -50,4 +50,40 @@ class AtomicTest < AtomicTestCase
 
     assert_select %(a[href="#"][class="atomic-link"]), text: "Link", count: 1
   end
+
+  test "view partials declare foundational defaults as options" do
+    declare_template "comments/show", <<~ERB
+      <%= atomic.link_to(
+        "#",
+        id: "passed-along",
+        rel: nil,
+        class: "link--special",
+        "data-controller": "special-link",
+      ) do %>
+        Link
+      <% end %>
+    ERB
+    declare_template "atomic/_link_to", <<~ERB
+      <%= link_to(
+        *arguments,
+        **options.with_token_list_defaults(
+          class: "atomic-link",
+          "data-controller": "tracked-link",
+          "data-action": "click->tracked-link#track",
+        ).with_defaults(
+          rel: "nofollow",
+        ),
+        &block
+      ) %>
+    ERB
+
+    render "comments/show"
+
+    assert_select %(a[rel="nofollow"]), count: 0
+    assert_select %(a[href="#"][id="passed-along"]), text: "Link", count: 1
+    assert_select %(a[class~="atomic-link"][class~="link--special"]), count: 1
+    assert_select %(a[data-controller~="tracked-link"]), count: 1
+    assert_select %(a[data-controller~="special-link"]), count: 1
+    assert_select %(a[data-action~="click->tracked-link#track"]), count: 1
+  end
 end

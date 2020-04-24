@@ -62,6 +62,90 @@ Next, declare view partials for methods you'd like to override:
 [tag]: https://api.rubyonrails.org/classes/ActionView/Helpers/TagHelper.html#method-i-tag
 [helpers]: https://api.rubyonrails.org/classes/ActionView/Helpers.html
 
+#### Declaring default HTML Attributes
+
+When extracting view partials, we do so in an effort to declare and share a
+standard set of [CSS class names][mdn-class], or other [HTML
+attributes][mdn-attributes].
+
+Sometimes, it can be tricky to make sure that our base set of attributes are
+_extended_ by the calling view template, and not _overridden_.
+
+To facilitate in that, the partial-local `options` variable is a _decorated_
+[`Hash` instance][ruby-hash] that exposes the `with_token_list_defaults` method.
+
+Consider an application template, along with an `atomic/tags/h1` partial:
+
+```html+erb
+<%# app/views/comments/show.html.erb %>
+<%= atomic_tag.h1 class: "heading--special" do %>
+  Special Heading
+<% end %>
+
+<%# app/views/atomic/tags/_h1.html.erb %>
+<%= tag.h1(
+  *arguments,
+  **options.with_token_list_defaults(
+    class: "heading heading--h1",
+  ),
+  &block
+) %>
+```
+
+The call to `with_token_list_defaults` is helpful in two ways:
+
+1. it ensures that by default, the resulting [`<h1>` element's][mdn-h1]  `class`
+   attribute will _always_ contain the values `heading` and `heading--h1`.
+
+2. calls to `atomic_tag.h1` that pass in `class:` options will have those values
+   _merged_ into the [`class` attribute's `DOMTokenList`][DOMTokenList]. For
+   example, in the case of this example code, the resulting [`<h1>`
+   element's][mdn-h1] will be rendered as:
+
+  ```html
+  <h1 class="heading heading--h1 heading--special">
+    Special Heading
+  </h1>
+  ```
+
+If there are other attributes that the partial would like to be overridden, the
+partial-local `options` instance adheres to the [`Hash` interface][ruby-hash]
+(including [`ActiveSupport`-provided `Hash` extensions][hash-extensions]).
+
+For instance, you could chain `with_defaults` off the value returned by
+`with_token_list_defaults`:
+
+```html+erb
+<%# app/views/comments/show.html.erb %>
+<%= atomic.link_to "/safe-page.html", class: "link--followed", rel: nil do %>
+ A link without rel attribute
+<% end %>
+
+<%# app/views/atomic/_link_to.html.erb %>
+<%= link_to(
+  *arguments,
+  **options.with_token_list_defaults(
+    class: "link",
+  ).with_defaults(
+    rel: :nofollow,
+  ),
+  &block
+) %>
+
+<!-- resulting HTML -->
+<a href="/safe-page.html" class="link link--followed">
+ A link without rel attribute
+</a>
+```
+
+[mdn-class]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class
+[mdn-attributes]: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
+[ruby-hash]: https://ruby-doc.org/core-2.7.1/Hash.html
+[mdn-h1]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements
+[DOMTokenList]: https://developer.mozilla.org/en-US/docs/Web/API/DOMTokenList
+[hash-extensions]: https://guides.rubyonrails.org/active_support_core_extensions.html#extensions-to-hash
+[with_defaults]: https://api.rubyonrails.org/classes/Hash.html#method-i-with_defaults
+
 ### View Partials for your application's components
 
 The `atomic.component` view helper provides a means of rendering view partials
